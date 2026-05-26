@@ -90,15 +90,27 @@ async function generateKey() {
   const box = document.getElementById("keyBox")
 
   try {
-    status.innerText = "Generating key..."
+    status.innerText = "Generating..."
 
     const res = await fetch("https://key-api.dzaxtheonly1.workers.dev/generate")
 
+    if (!res.ok) {
+      throw new Error("HTTP error " + res.status)
+    }
+
     const data = await res.json()
 
-    latestKey = data[0].license_key
+    console.log("DEBUG DATA:", data)
 
-    box.innerText = latestKey
+    if (!data || !data.length || !data[0].license_key) {
+      throw new Error("Invalid response format")
+    }
+
+    const key = data[0].license_key
+
+    box.innerText = key
+    latestKey = key
+
     status.innerText = "Key generated successfully ✅"
 
   } catch (err) {
