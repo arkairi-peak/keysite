@@ -1,79 +1,119 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+  <meta charset="UTF-8" />
   <title>Key System</title>
 
   <style>
     body {
-      background: #0f0f0f;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f1115;
       color: white;
-      font-family: Arial;
-      text-align: center;
-      padding-top: 100px;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
     }
 
-    .box {
-      background: #1a1a1a;
+    .card {
+      background: #1a1d25;
       padding: 30px;
-      width: 300px;
-      margin: auto;
       border-radius: 12px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    h2 {
+      margin-bottom: 15px;
     }
 
     button {
       width: 100%;
       padding: 12px;
-      background: #5865F2;
+      margin-top: 10px;
       border: none;
-      color: white;
       border-radius: 8px;
       cursor: pointer;
-      margin-top: 10px;
+      font-weight: bold;
     }
 
-    #key {
+    .gen {
+      background: #5865F2;
+      color: white;
+    }
+
+    .copy {
+      background: #2d2f36;
+      color: white;
+    }
+
+    .keybox {
       margin-top: 15px;
+      padding: 10px;
+      background: #0d0f14;
+      border-radius: 8px;
       word-break: break-all;
+      min-height: 20px;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #aaa;
     }
   </style>
 </head>
 
 <body>
 
-<div class="box">
+<div class="card">
+  <h2>🔑 Key System</h2>
 
-  <h2>Key System</h2>
+  <button class="gen" onclick="generateKey()">Generate Key</button>
 
-  <button onclick="getKey()">Generate Key</button>
+  <div class="keybox" id="keyBox">No key generated</div>
 
-  <div id="key"></div>
+  <button class="copy" onclick="copyKey()">Copy Key</button>
 
-  <button onclick="copyKey()">Copy Key</button>
-
+  <div class="status" id="status"></div>
 </div>
 
 <script>
 
 let latestKey = ""
 
-async function getKey() {
+async function generateKey() {
+  const status = document.getElementById("status")
+  const box = document.getElementById("keyBox")
 
-  const res = await fetch(
-    "https://key-api.dzaxtheonly1.workers.dev/generate"
-  )
+  try {
+    status.innerText = "Generating key..."
 
-  const data = await res.json()
+    const res = await fetch("https://key-api.dzaxtheonly1.workers.dev/generate")
 
-  latestKey = data[0].license_key
+    const data = await res.json()
 
-  document.getElementById("key").innerText =
-    "KEY: " + latestKey
+    latestKey = data[0].license_key
+
+    box.innerText = latestKey
+    status.innerText = "Key generated successfully ✅"
+
+  } catch (err) {
+    console.log(err)
+    status.innerText = "Error generating key ❌"
+  }
 }
 
 function copyKey() {
+  if (!latestKey) return
+
   navigator.clipboard.writeText(latestKey)
-  alert("Copied!")
+
+  document.getElementById("status").innerText =
+    "Copied to clipboard 📋"
 }
 
 </script>
