@@ -2,42 +2,39 @@
 <html>
 
 <head>
-  <title>TapherLib Key System</title>
+  <title>Key System</title>
 
   <style>
     body {
       background: #0f0f0f;
       color: white;
       font-family: Arial;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      text-align: center;
+      padding-top: 100px;
     }
 
     .box {
       background: #1a1a1a;
       padding: 30px;
+      width: 300px;
+      margin: auto;
       border-radius: 12px;
-      width: 350px;
-      text-align: center;
     }
 
     button {
       width: 100%;
       padding: 12px;
-      border: none;
-      border-radius: 8px;
       background: #5865F2;
+      border: none;
       color: white;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 16px;
+      margin-top: 10px;
     }
 
-    #result {
-      margin-top: 20px;
+    #key {
+      margin-top: 15px;
       word-break: break-all;
-      font-size: 18px;
     }
   </style>
 </head>
@@ -46,31 +43,37 @@
 
 <div class="box">
 
-  <h1>TapherLib Key System</h1>
+  <h2>Key System</h2>
 
-  <button onclick="generateKey()">
-    Generate Key
-  </button>
+  <button onclick="getKey()">Generate Key</button>
 
-  <div id="result"></div>
+  <div id="key"></div>
+
+  <button onclick="copyKey()">Copy Key</button>
 
 </div>
 
 <script>
 
-async function generateKey() {
+let latestKey = ""
 
-  const response = await fetch(
+async function getKey() {
+
+  const res = await fetch(
     "https://key-api.dzaxtheonly1.workers.dev/generate"
   )
 
-  const data = await response.json()
+  const data = await res.json()
 
-  document.getElementById("result").innerHTML =
-    `
-    <p>Your Key:</p>
-    <b>${data[0].license_key}</b>
-    `
+  latestKey = data[0].license_key
+
+  document.getElementById("key").innerText =
+    "KEY: " + latestKey
+}
+
+function copyKey() {
+  navigator.clipboard.writeText(latestKey)
+  alert("Copied!")
 }
 
 </script>
