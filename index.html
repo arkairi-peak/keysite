@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Key System</title>
+
+  <style>
+    body {
+      background: #0f0f0f;
+      color: white;
+      font-family: Arial;
+      text-align: center;
+      padding-top: 100px;
+    }
+
+    .box {
+      background: #1a1a1a;
+      padding: 30px;
+      width: 300px;
+      margin: auto;
+      border-radius: 12px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #5865F2;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    #key {
+      margin-top: 15px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <h2>Key System</h2>
+
+  <button onclick="getKey()">Generate Key</button>
+
+  <div id="key"></div>
+
+  <button onclick="copyKey()">Copy Key</button>
+
+</div>
+
+<script>
+
+let latestKey = ""
+
+async function getKey() {
+
+  const res = await fetch(
+    "https://key-api.dzaxtheonly1.workers.dev/generate"
+  )
+
+  const data = await res.json()
+
+  latestKey = data[0].license_key
+
+  document.getElementById("key").innerText =
+    "KEY: " + latestKey
+}
+
+function copyKey() {
+  navigator.clipboard.writeText(latestKey)
+  alert("Copied!")
+}
+
+</script>
+
+</body>
+</html>
