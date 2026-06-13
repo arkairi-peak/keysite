@@ -47,6 +47,21 @@ body{
 
     color:white;
     z-index:2;
+    animation:float 6s ease-in-out infinite;
+    @keyframes float{
+
+    0%{
+        transform:translateY(0px);
+    }
+
+    50%{
+        transform:translateY(-6px);
+    }
+
+    100%{
+        transform:translateY(0px);
+    }
+}
 }
 
 .mac-buttons{
@@ -89,20 +104,102 @@ h1{
     word-break:break-all;
 }
 
+    .history-container{
+    margin-top:15px;
+    padding:12px;
+    border-radius:14px;
+
+    background:rgba(255,255,255,.04);
+
+    border:1px solid rgba(255,255,255,.08);
+}
+
+.history-title{
+    opacity:.65;
+    margin-bottom:8px;
+    font-size:13px;
+}
+
+.history-key{
+    color:#8bb8ff;
+    word-break:break-all;
+    font-size:14px;
+}
+    
 .button{
+    position:relative;
+    overflow:hidden;
+
     width:100%;
     border:none;
     cursor:pointer;
+
     border-radius:14px;
     padding:14px;
     margin-top:12px;
+
     font-size:15px;
     color:white;
-    transition:.2s;
+
+    transition:.35s;
+
+    border:1px solid rgba(255,255,255,.08);
+}
+
+    .button::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:-200%;
+    left:-60%;
+
+    width:50%;
+    height:500%;
+
+    transform:rotate(25deg);
+
+    background:
+    linear-gradient(
+        transparent,
+        rgba(255,255,255,.35),
+        transparent
+    );
+
+    transition:.8s;
+}
+
+.button:hover::before{
+    left:160%;
+}
+
+    .button::after{
+
+    content:"";
+
+    position:absolute;
+    inset:0;
+
+    border-radius:14px;
+
+    border:1px solid rgba(130,180,255,.6);
+
+    opacity:0;
+
+    transition:.35s;
+}
+
+    .button:hover::after{
+    opacity:1;
 }
 
 .button:hover{
-    transform:translateY(-2px);
+    transform:translateY(-3px);
+
+    box-shadow:
+    0 0 15px rgba(80,140,255,.5),
+    0 0 40px rgba(80,140,255,.2);
 }
 
 .generate{
@@ -153,6 +250,11 @@ h1{
         No key generated
     </div>
 
+    <div class="history-container">
+    <div class="history-title">Recent Key</div>
+    <div id="historyKey" class="history-key">None</div>
+</div>
+
     <button class="button generate" onclick="generateKey()">
         Generate Key
     </button>
@@ -195,7 +297,13 @@ async function generateKey(){
         expiryDate =
         new Date(data[0].expires_at)
 
+        localStorage.setItem("tapher_key", currentKey)
+        localStorage.setItem("tapher_expiry", expiryDate.toISOString())
+
         document.getElementById("keyBox")
+        .textContent = currentKey
+
+        document.getElementById("historyKey")
         .textContent = currentKey
 
         status.textContent =
@@ -264,6 +372,24 @@ function updateCountdown(){
 
     },1000)
 }
+
+window.addEventListener("load", () => {
+
+    const savedKey = localStorage.getItem("tapher_key")
+    const savedExpiry = localStorage.getItem("tapher_expiry")
+
+    if(savedKey && savedExpiry){
+
+        currentKey = savedKey
+        expiryDate = new Date(savedExpiry)
+
+        document.getElementById("keyBox").textContent = currentKey
+        document.getElementById("historyKey").textContent = currentKey
+
+        updateCountdown()
+    }
+})
+    
 </script>
 
 </body>
