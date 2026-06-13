@@ -1,134 +1,271 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <title>Key System</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tapher Key System</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f1115;
-      color: white;
-      display: flex;
-      height: 100vh;
-      justify-content: center;
-      align-items: center;
-    }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Inter,Arial,sans-serif;
+}
 
-    .card {
-      background: #1a1d25;
-      padding: 30px;
-      border-radius: 12px;
-      width: 320px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    }
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:url("https://media.istockphoto.com/id/2187213676/photo/black-dark-navy-cobalt-blue-white-abstract-background-color-gradient-ombre-noise-grain-mesh.jpg?s=612x612&w=0&k=20&c=i7MIbbQh6EUx2ghIKZhmbyWzYexs6AfTcKrqERMbTSU=") center center/cover no-repeat;
+    overflow:hidden;
+}
 
-    h2 {
-      margin-bottom: 15px;
-    }
+.overlay{
+    position:absolute;
+    inset:0;
+    backdrop-filter:blur(15px);
+    background:rgba(0,0,0,0.35);
+}
 
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+.card{
+    position:relative;
+    width:420px;
+    padding:30px;
+    border-radius:24px;
 
-    .gen {
-      background: #5865F2;
-      color: white;
-    }
+    background:rgba(20,35,60,0.45);
+    backdrop-filter:blur(30px);
 
-    .copy {
-      background: #2d2f36;
-      color: white;
-    }
+    border:1px solid rgba(255,255,255,0.15);
 
-    .keybox {
-      margin-top: 15px;
-      padding: 10px;
-      background: #0d0f14;
-      border-radius: 8px;
-      word-break: break-all;
-      min-height: 20px;
-    }
+    box-shadow:
+    0 8px 32px rgba(0,0,0,.4),
+    0 0 30px rgba(80,120,255,.15);
 
-    .status {
-      margin-top: 10px;
-      font-size: 13px;
-      color: #aaa;
-    }
-  </style>
+    color:white;
+    z-index:2;
+}
+
+.mac-buttons{
+    display:flex;
+    gap:8px;
+    margin-bottom:20px;
+}
+
+.dot{
+    width:12px;
+    height:12px;
+    border-radius:999px;
+}
+
+.red{background:#ff5f57;}
+.yellow{background:#febc2e;}
+.green{background:#28c840;}
+
+h1{
+    text-align:center;
+    margin-bottom:8px;
+}
+
+.subtitle{
+    text-align:center;
+    opacity:.7;
+    margin-bottom:25px;
+}
+
+.key-box{
+    width:100%;
+    min-height:55px;
+    border-radius:14px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px;
+    word-break:break-all;
+}
+
+.button{
+    width:100%;
+    border:none;
+    cursor:pointer;
+    border-radius:14px;
+    padding:14px;
+    margin-top:12px;
+    font-size:15px;
+    color:white;
+    transition:.2s;
+}
+
+.button:hover{
+    transform:translateY(-2px);
+}
+
+.generate{
+    background:linear-gradient(
+        135deg,
+        rgb(40,90,255),
+        rgb(80,130,255)
+    );
+}
+
+.copy{
+    background:rgba(255,255,255,.08);
+}
+
+.countdown{
+    margin-top:18px;
+    text-align:center;
+    font-size:14px;
+    opacity:.85;
+}
+
+.status{
+    text-align:center;
+    margin-top:10px;
+    color:#9dc1ff;
+}
+</style>
 </head>
 
 <body>
 
+<div class="overlay"></div>
+
 <div class="card">
-  <h2>🔑 Key System</h2>
 
-  <button class="gen" onclick="generateKey()">Generate Key</button>
+    <div class="mac-buttons">
+        <div class="dot red"></div>
+        <div class="dot yellow"></div>
+        <div class="dot green"></div>
+    </div>
 
-  <div class="keybox" id="keyBox">No key generated</div>
+    <h1>🔑 Tapher Keys</h1>
+    <div class="subtitle">
+        Secure Authentication System
+    </div>
 
-  <button class="copy" onclick="copyKey()">Copy Key</button>
+    <div id="keyBox" class="key-box">
+        No key generated
+    </div>
 
-  <div class="status" id="status"></div>
+    <button class="button generate" onclick="generateKey()">
+        Generate Key
+    </button>
+
+    <button class="button copy" onclick="copyKey()">
+        Copy Key
+    </button>
+
+    <div id="countdown" class="countdown">
+        Generate a key first
+    </div>
+
+    <div id="status" class="status"></div>
+
 </div>
 
 <script>
 
-let latestKey = ""
+const API =
+"https://key-api.dzaxtheonly1.workers.dev/generate"
 
-async function generateKey() {
-  const status = document.getElementById("status")
-  const box = document.getElementById("keyBox")
+let currentKey = ""
+let expiryDate = null
 
-  try {
-    status.innerText = "Generating..."
+async function generateKey(){
 
-    const res = await fetch("https://key-api.dzaxtheonly1.workers.dev/generate")
+    const status =
+    document.getElementById("status")
 
-    if (!res.ok) {
-      throw new Error("HTTP error " + res.status)
+    try{
+
+        status.textContent = "Generating..."
+
+        const res = await fetch(API)
+        const data = await res.json()
+
+        currentKey =
+        data[0].license_key
+
+        expiryDate =
+        new Date(data[0].expires_at)
+
+        document.getElementById("keyBox")
+        .textContent = currentKey
+
+        status.textContent =
+        "Key generated successfully"
+
+        updateCountdown()
+
+    }catch(err){
+
+        console.error(err)
+
+        status.textContent =
+        "Failed to generate key"
+
     }
-
-    const data = await res.json()
-
-    console.log("DEBUG DATA:", data)
-
-    if (!data || !data.length || !data[0].license_key) {
-      throw new Error("Invalid response format")
-    }
-
-    const key = data[0].license_key
-
-    box.innerText = key
-    latestKey = key
-
-    status.innerText = "Key generated successfully ✅"
-
-  } catch (err) {
-    console.log(err)
-    status.innerText = "Error generating key ❌"
-  }
 }
 
-function copyKey() {
-  if (!latestKey) return
+function copyKey(){
 
-  navigator.clipboard.writeText(latestKey)
+    if(!currentKey) return
 
-  document.getElementById("status").innerText =
-    "Copied to clipboard 📋"
+    navigator.clipboard
+    .writeText(currentKey)
+
+    document.getElementById("status")
+    .textContent = "Copied to clipboard"
 }
 
+function updateCountdown(){
+
+    if(!expiryDate) return
+
+    const countdown =
+    document.getElementById("countdown")
+
+    const interval = setInterval(()=>{
+
+        const now = new Date()
+        const diff = expiryDate - now
+
+        if(diff <= 0){
+
+            countdown.textContent =
+            "Expired"
+
+            clearInterval(interval)
+            return
+        }
+
+        const hours =
+        Math.floor(diff/1000/60/60)
+
+        const mins =
+        Math.floor(
+            (diff%(1000*60*60))
+            /(1000*60)
+        )
+
+        const secs =
+        Math.floor(
+            (diff%(1000*60))/1000
+        )
+
+        countdown.textContent =
+        `Expires in ${hours}h ${mins}m ${secs}s`
+
+    },1000)
+}
 </script>
 
 </body>
 </html>
+```
